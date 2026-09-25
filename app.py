@@ -57,6 +57,45 @@ def add_product():
         "message": "Product added successfully"
     }), 201
 
+@app.route("/orders", methods=["GET"])
+def get_orders():
+    connection = get_db_connection()
 
+    orders = connection.execute(
+        "SELECT * FROM orders"
+    ).fetchall()
+
+    connection.close()
+
+    return jsonify([dict(order) for order in orders])
+
+
+@app.route("/orders", methods=["POST"])
+def add_order():
+    data = request.get_json()
+
+    member_id = data.get("member_id")
+    order_round_id = data.get("order_round_id")
+    order_date = data.get("order_date")
+
+    if not member_id or not order_round_id or not order_date:
+        return jsonify({
+            "error": "member_id, order_round_id and order_date are required"
+        }), 400
+
+    connection = get_db_connection()
+
+    connection.execute(
+        """INSERT INTO orders (member_id, order_round_id, order_date)
+        VALUES (?, ?, ?)""",
+        (member_id, order_round_id, order_date)
+    )
+
+    connection.commit()
+    connection.close()
+
+    return jsonify({
+        "message": "Order added successfully"
+    }), 201
 if __name__ == "__main__":
     app.run(debug=True)

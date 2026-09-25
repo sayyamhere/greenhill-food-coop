@@ -17,40 +17,45 @@ def home():
     return "Greenhill Food Co-op Ordering System"
 
 
-@app.route("/members", methods=["GET"])
-def get_members():
+@app.route("/products", methods=["GET"])
+def get_products():
     connection = get_db_connection()
 
-    members = connection.execute(
-        "SELECT * FROM members"
+    products = connection.execute(
+        "SELECT * FROM products"
     ).fetchall()
 
     connection.close()
 
-    return jsonify([dict(member) for member in members])
+    return jsonify([dict(product) for product in products])
 
 
-@app.route("/members", methods=["POST"])
-def add_member():
+@app.route("/products", methods=["POST"])
+def add_product():
     data = request.get_json()
 
     name = data.get("name")
-    email = data.get("email")
+    price = data.get("price")
+    stock = data.get("stock", 0)
 
-    if not name or not email:
-        return jsonify({"error": "Name and email are required"}), 400
+    if not name or price is None:
+        return jsonify({
+            "error": "name and price are required"
+        }), 400
 
     connection = get_db_connection()
 
     connection.execute(
-        "INSERT INTO members (name, email) VALUES (?, ?)",
-        (name, email)
+        "INSERT INTO products (name, price, stock) VALUES (?, ?, ?)",
+        (name, price, stock)
     )
 
     connection.commit()
     connection.close()
 
-    return jsonify({"message": "Member added successfully"}), 201
+    return jsonify({
+        "message": "Product added successfully"
+    }), 201
 
 
 if __name__ == "__main__":

@@ -97,5 +97,32 @@ def add_order():
     return jsonify({
         "message": "Order added successfully"
     }), 201
+@app.route("/order-items", methods=["POST"])
+def add_order_item():
+    data = request.get_json()
+
+    order_id = data.get("order_id")
+    product_id = data.get("product_id")
+    quantity = data.get("quantity")
+
+    if not order_id or not product_id or not quantity:
+        return jsonify({
+            "error": "order_id, product_id and quantity are required"
+        }), 400
+
+    connection = get_db_connection()
+
+    connection.execute(
+        """INSERT INTO order_items (order_id, product_id, quantity)
+        VALUES (?, ?, ?)""",
+        (order_id, product_id, quantity)
+    )
+
+    connection.commit()
+    connection.close()
+
+    return jsonify({
+        "message": "Order item added successfully"
+    }), 201
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5001)

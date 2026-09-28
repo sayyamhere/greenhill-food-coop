@@ -1,9 +1,10 @@
 from flask import Flask, request, jsonify
 import sqlite3
-
+from config import DevelopmentConfig
 app = Flask(__name__)
+app.config.from_object(DevelopmentConfig)
 
-DATABASE = "greenhill.db"
+DATABASE = app.config["DATABASE"]
 
 
 def get_db_connection():
